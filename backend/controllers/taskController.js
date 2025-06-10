@@ -188,6 +188,84 @@ const rejectTask = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Doctor requests a due date change for a task
+// @route   PUT /api/tasks/:id/request-date-change
+// @access  Private (Doctor Only)
+const requestDateChange = asyncHandler(async (req, res) => {
+    // This is a placeholder function. You'll implement the actual logic here.
+    // Example: Doctor sends a new requestedDueDate and a reason.
+    const task = await Task.findById(req.params.id);
+    const { requestedDueDate, requestReason } = req.body;
+
+    if (!task) {
+        res.status(404);
+        throw new Error('Task not found');
+    }
+
+    if (req.user.role !== 'doctor' || task.assignedTo.toString() !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to request a date change for this task.');
+    }
+
+    // Add logic to save the request (e.g., to the task model, or a separate request model)
+    // For now, let's just update the task with pending request status and new date
+    task.dateChangeRequest = {
+        status: 'pending',
+        requestedDate: new Date(requestedDueDate),
+        reason: requestReason,
+        requestedBy: req.user.id,
+        requestDate: new Date()
+    };
+    await task.save();
+
+    res.status(200).json({ message: 'Date change request submitted for review.', task });
+});
+
+// @desc    Admin reviews/approves/rejects a date change request
+// @route   PUT /api/tasks/:id/review-date-change
+// @access  Private (Admin Only)
+const reviewDateChange = asyncHandler(async (req, res) => {
+    // This is a placeholder function. You'll implement the actual logic here.
+    // Example: Admin sends approval status (approved/rejected) and an optional admin reason.
+    const task = await Task.findById(req.params.id);
+    const { approvalStatus, adminReason } = req.body; // approvalStatus: 'approved' or 'rejected'
+
+    if (!task) {
+        res.status(404);
+        throw new Error('Task not found');
+    }
+
+    if (req.user.role !== 'admin') {
+        res.status(403);
+        throw new Error('Not authorized to review date change requests.');
+    }
+
+    if (!task.dateChangeRequest || task.dateChangeRequest.status !== 'pending') {
+        res.status(400);
+        throw new Error('No pending date change request for this task.');
+    }
+
+    if (approvalStatus === 'approved') {
+        task.dueDate = task.dateChangeRequest.requestedDate; // Update the actual due date
+        task.dateChangeRequest.status = 'approved';
+        task.dateChangeRequest.adminNotes = adminReason;
+        task.dateChangeRequest.reviewDate = new Date();
+        task.dateChangeRequest.reviewedBy = req.user.id;
+    } else if (approvalStatus === 'rejected') {
+        task.dateChangeRequest.status = 'rejected';
+        task.dateChangeRequest.adminNotes = adminReason;
+        task.dateChangeRequest.reviewDate = new Date();
+        task.dateChangeRequest.reviewedBy = req.user.id;
+    } else {
+        res.status(400);
+        throw new Error('Invalid approvalStatus. Must be "approved" or "rejected".');
+    }
+
+    await task.save();
+
+    res.status(200).json({ message: `Date change request ${approvalStatus}.`, task });
+});
+
 module.exports = {
     getTasks,
     setTask,
@@ -195,4 +273,6 @@ module.exports = {
     deleteTask,
     acceptTask,
     rejectTask,
+    requestDateChange,
+    reviewDateChange,
 };

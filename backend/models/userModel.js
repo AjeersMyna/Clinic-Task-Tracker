@@ -10,15 +10,16 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    username: { // This field is likely causing the 'username_1 dup key' error
+    username: {
       type: String,
-      required: true,
-      unique: true, // This is the crucial part that caused the E11000 error
+      required: false, // CHANGED: Make username not required
+      unique: true,
+      sparse: true, // ADDED: Allows multiple documents to have a null username
     },
     email: {
       type: String,
       required: true,
-      unique: true, // Email is also usually unique
+      unique: true,
     },
     password: {
       type: String,
@@ -26,9 +27,9 @@ const userSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'doctor', 'staff', 'patient'], // Example roles
-      default: 'patient', // Or 'doctor' based on your default logic
-      required: true,
+      enum: ['admin', 'doctor', 'staff', 'patient'],
+      default: 'patient',
+      required: true, // Keeping this as required for now, assuming frontend sends it or you'll adjust default logic.
     },
     // Add other fields as per your design
   },
@@ -39,6 +40,7 @@ const userSchema = mongoose.Schema(
 
 // Encrypt password before saving
 userSchema.pre('save', async function (next) {
+  // Only hash password if it's new or has been modified
   if (!this.isModified('password')) {
     next();
   }
