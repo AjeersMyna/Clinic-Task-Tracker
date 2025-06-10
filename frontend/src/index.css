@@ -1,0 +1,265 @@
+/* frontend/src/index.css */
+
+/* Import Google Fonts for a more professional look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Define CSS variables for a consistent and modern color palette */
+:root {
+  /* Primary Brand Colors */
+  --primary-color: #34495e; /* Dark Blue-Gray, for headers, navigation, main accents */
+  --primary-hover: #2c3e50; /* Slightly darker primary for hover states */
+  --accent-color: #1abc9c; /* Bright Teal/Turquoise, for primary buttons, highlights */
+  --accent-hover: #16a085; /* Darker teal for accent hover */
+
+  /* Neutral Colors */
+  --light-bg: #ecf0f1; /* Very Light Gray/Off-white, for page background */
+  --white: #ffffff;
+  --dark-text: #2c3e50; /* Very dark blue-gray for main text content */
+  --medium-gray: #7f8c8d; /* Medium gray for secondary text, borders */
+  --light-gray-border: rgba(0, 0, 0, 0.1);
+
+  /* Feedback/Status Colors */
+  --success-color: #2ecc71; /* Green for success */
+  --warning-color: #f39c12; /* Orange for warning/in-progress */
+  --danger-color: #e74c3c; /* Red for danger/rejected */
+  --info-color: #3498db; /* Blue for info/pending-acceptance */
+  --secondary-color-btn: #6c757d; /* Bootstrap secondary button color */
+  --secondary-hover-btn: #5a6268;
+
+  /* Shadows */
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+/* General Body Styles */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif; /* Use the imported Inter font */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--light-bg); /* Apply light background color */
+  color: var(--dark-text); /* Apply dark text color */
+  line-height: 1.6;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* --- Bootstrap Overrides & Custom Styles --- */
+
+/* Navbar Styling */
+.navbar {
+  background-color: var(--primary-color); /* Dark blue-gray navbar background */
+  padding: 1rem 0;
+  box-shadow: 0 2px 10px var(--shadow-medium); /* Slightly stronger shadow */
+}
+
+.navbar-brand {
+  color: var(--white) !important; /* White brand text */
+  font-weight: 700; /* Bolder font weight */
+  font-size: 1.6rem; /* Slightly larger font size */
+  transition: color 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: var(--accent-color) !important; /* Teal on hover */
+}
+
+.navbar-nav .nav-link {
+  color: var(--white) !important; /* White nav links */
+  font-weight: 500;
+  margin-left: 1.2rem; /* More spacing between links */
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--accent-color) !important; /* Teal on hover */
+}
+
+/* Card Styling (Applies to Login, Register, TaskForm, TaskList Task Cards) */
+.card {
+  border: none; /* Remove default border */
+  border-radius: 12px; /* Softer rounded corners */
+  box-shadow: 0 8px 25px var(--shadow-medium); /* More pronounced, diffused shadow */
+  overflow: hidden; /* Ensures content respects border-radius */
+  background-color: var(--white); /* White card background */
+}
+
+.card-title {
+  color: var(--primary-color); /* Apply primary color to card titles */
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem; /* Larger card titles */
+}
+
+.card-body {
+  padding: 2.5rem; /* More padding inside cards */
+}
+
+/* Form Control Styling */
+.form-label {
+  font-weight: 500;
+  color: var(--dark-text);
+  margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+  border-radius: 8px; /* Slightly more rounded inputs */
+  border: 1px solid var(--light-gray-border);
+  padding: 0.85rem 1rem; /* More padding in inputs */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  color: var(--dark-text);
+  background-color: var(--white);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent-color); /* Teal border on focus */
+  box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25); /* Teal focus ring */
+  background-color: var(--white);
+}
+
+.form-control::placeholder {
+  color: var(--medium-gray);
+  opacity: 0.7;
+}
+
+.invalid-feedback {
+  font-size: 0.875em;
+  color: var(--danger-color); /* Use red for error messages */
+}
+
+
+/* Button Styling */
+.btn {
+  border-radius: 50px; /* Pill-shaped buttons */
+  font-weight: 600;
+  padding: 0.75rem 1.75rem; /* More padding for a bolder look */
+  transition: all 0.3s ease;
+  text-transform: uppercase; /* Uppercase text for buttons */
+  letter-spacing: 0.5px;
+}
+
+.btn-lg {
+  padding: 0.9rem 2.2rem;
+  font-size: 1.1rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 4px 10px var(--shadow-light); /* Subtle shadow on hover */
+  transform: translateY(-1px); /* Slight lift effect */
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color-btn);
+  border-color: var(--secondary-color-btn);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: var(--secondary-hover-btn);
+  border-color: var(--secondary-hover-btn);
+  box-shadow: 0 4px 10px var(--shadow-light);
+  transform: translateY(-1px);
+}
+
+.btn-info {
+  background-color: #3498db; /* Specific info color */
+  border-color: #3498db;
+  color: var(--white);
+}
+
+.btn-info:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+.btn-danger {
+  background-color: var(--danger-color); /* Specific danger color */
+  border-color: var(--danger-color);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+.btn-success {
+  background-color: var(--success-color); /* Specific success color */
+  border-color: var(--success-color);
+  color: var(--white);
+}
+
+.btn-success:hover {
+  background-color: #27ae60;
+  border-color: #27ae60;
+}
+
+
+/* Status Badges */
+.badge {
+  padding: 0.45em 1em; /* More padding for badges */
+  border-radius: 50px; /* Pill-shaped badges */
+  font-weight: 600; /* Bolder text */
+  text-transform: capitalize;
+  font-size: 0.85em;
+  min-width: 90px; /* Ensure consistent width */
+  text-align: center;
+}
+
+.badge.bg-success { background-color: var(--success-color) !important; color: var(--white) !important; }
+.badge.bg-warning { background-color: var(--warning-color) !important; color: var(--white) !important; }
+.badge.bg-secondary { background-color: var(--medium-gray) !important; color: var(--white) !important; }
+.badge.bg-danger { background-color: var(--danger-color) !important; color: var(--white) !important; }
+.badge.bg-info { background-color: var(--info-color) !important; color: var(--white) !important; }
+
+
+/* Main Container Padding */
+.container.mt-5 { /* Targeting the main container in App.js */
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+/* Responsive adjustments for filters/sort */
+.d-flex.flex-wrap > div {
+  flex: 1 1 auto; /* Allow items to grow and shrink */
+  min-width: 180px; /* Minimum width before wrapping */
+  margin-bottom: 1rem; /* Add some vertical spacing when wrapped */
+}
+
+/* Adjustments for modals */
+.modal-content {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px var(--shadow-medium);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--light-gray-border);
+  padding: 1.5rem;
+}
+
+.modal-title {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--light-gray-border);
+  padding: 1.5rem;
+}

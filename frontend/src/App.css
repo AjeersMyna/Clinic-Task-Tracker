@@ -1,0 +1,91 @@
+/* frontend/src/App.css */
+
+/*
+   Note: Global body styles are now managed in index.css for consistency.
+   This file will focus on App component specific layout and header/footer styling.
+*/
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure app takes full viewport height */
+  /* Remove text-align: center; from here as we'll center content using Bootstrap classes */
+}
+
+/* Header Styling - Aligned with new theme */
+.App-header {
+  background-color: var(--primary-color); /* Dark blue-gray for header, from index.css variables */
+  color: var(--white); /* White text */
+  padding: 2.5rem 0; /* More vertical padding */
+  box-shadow: 0 4px 15px var(--shadow-medium); /* Deeper, softer shadow from index.css */
+  text-align: center;
+  /* Keeping rounded corners for a distinct header look */
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  margin-bottom: 40px; /* More space below header */
+  position: relative;
+  z-index: 10;
+  /* Use a subtle gradient for depth */
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+}
+
+.App-header h1 {
+  font-weight: 700;
+  margin-bottom: 0.75rem; /* Slightly more space below title */
+  font-size: 3rem; /* Larger, more impactful heading */
+  letter-spacing: 0.5px; /* Subtle letter spacing */
+}
+
+.App-header p {
+  font-size: 1.3rem; /* Larger sub-heading */
+  opacity: 0.9;
+  font-weight: 300; /* Lighter weight for sub-heading */
+}
+
+/* Add Task Button Styling - Aligned with new theme */
+.add-task-button {
+  background-color: var(--accent-color); /* Teal/Turquoise from index.css */
+  color: var(--white);
+  padding: 14px 35px; /* More padding for a bolder button */
+  border: none;
+  border-radius: 50px; /* Pill shape */
+  cursor: pointer;
+  font-size: 1.2em; /* Larger font */
+  font-weight: 600;
+  margin-top: 30px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3); /* Shadow reflecting accent color */
+  text-transform: uppercase; /* Uppercase text */
+  letter-spacing: 0.8px;
+}
+
+.add-task-button:hover {
+  background-color: var(--accent-hover); /* Darker teal on hover */
+  transform: translateY(-3px); /* More pronounced lift effect */
+  box-shadow: 0 8px 20px rgba(26, 188, 156, 0.4); /* Stronger shadow on hover */
+}
+
+main {
+  flex-grow: 1;
+  padding-bottom: 60px; /* More space above footer */
+  padding-top: 20px; /* Some padding at the top of the main content area */
+}
+
+/* Footer Styling - Aligned with new theme */
+.App-footer {
+  background-color: var(--primary-color); /* Dark blue-gray for footer */
+  color: var(--white);
+  padding: 20px 0; /* More padding */
+  text-align: center;
+  font-size: 0.95em;
+  margin-top: auto;
+  box-shadow: 0 -2px 10px var(--shadow-medium); /* Shadow on top of footer */
+  /* Rounded corners for footer top */
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.App-footer p {
+  margin: 0;
+  opacity: 0.9;
+}
