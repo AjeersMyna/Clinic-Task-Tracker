@@ -23,7 +23,7 @@ jobs:
         cd backend
         npm install
 
-    - name: Run server tests (if any)
+    - name: Run server tests
       run: |
         cd backend
         npm test
@@ -33,7 +33,7 @@ jobs:
         cd frontend
         npm install
 
-    - name: Run client tests (if any)
+    - name: Run client tests
       run: |
         cd frontend
         npm test
@@ -41,7 +41,7 @@ jobs:
     - name: Build Docker images
       run: docker-compose build
 
-    # This next step would be for AWS deployment (commented out for now)
+    # Uncomment this step to deploy to AWS
     # - name: Deploy to AWS
     #   if: success()
     #   run: |
