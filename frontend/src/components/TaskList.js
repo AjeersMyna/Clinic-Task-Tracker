@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Keep for display within component if needed, or remove if only toasts are used
+  const [error, setError] = useState(null);
   const [doctorsMap, setDoctorsMap] = useState({});
   const [doctorsList, setDoctorsList] = useState([]);
 
@@ -28,20 +28,19 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
   const [taskToReject, setTaskToReject] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  const { user } = useAuth();
+  const { user } = useAuth(); // <--- This line is already here, good!
 
   // Function to fetch tasks and doctors (remains the same)
   const fetchTasksAndDoctors = useCallback(async () => {
     if (!user || !user.token) {
-      // setError('Authentication required to fetch tasks.'); // Can keep this if you want an inline error
-      toast.error('Authentication required to fetch tasks.'); // Use toast for immediate feedback
+      toast.error('Authentication required to fetch tasks.');
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      setError(null); // Clear previous inline error
+      setError(null);
 
       const config = {
         headers: {
@@ -57,15 +56,29 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
         }
       };
 
-      // Fetch Doctors first
-      const doctorsResponse = await axios.get('http://localhost:5000/api/users/doctors', config);
-      const fetchedDoctors = doctorsResponse.data;
-      const map = {};
-      fetchedDoctors.forEach(doc => {
-        map[doc._id] = doc.name || doc.username || 'Unknown Doctor';
-      });
-      setDoctorsMap(map);
-      setDoctorsList(fetchedDoctors);
+      // Only fetch doctors if the user is an admin or if the assignedTo filter is relevant (e.g., for a doctor viewing their own tasks if assignedTo is set to their ID).
+      // For now, we'll fetch them for admins to populate the dropdown.
+      // If a doctor should *only* see their own tasks and not filter by other doctors, you might adjust the backend fetching logic as well.
+      // But for the UI, we only show the filter for admins.
+      if (user.role === 'admin') { // <--- Only fetch doctors list if user is admin
+        const doctorsResponse = await axios.get('http://localhost:5000/api/users/doctors', config);
+        const fetchedDoctors = doctorsResponse.data;
+        const map = {};
+        fetchedDoctors.forEach(doc => {
+          map[doc._id] = doc.name || doc.username || 'Unknown Doctor';
+        });
+        setDoctorsMap(map);
+        setDoctorsList(fetchedDoctors);
+      } else {
+        // If not an admin, clear the doctors list and map
+        setDoctorsMap({});
+        setDoctorsList([]);
+        // Also, if a doctor logs in, ensure their filterAssignedTo is set to their own ID by default
+        // This is a good place to ensure doctors only fetch their own tasks
+        // However, this might need more robust handling depending on your backend's task fetching logic.
+        // For now, the existing `fetchTasksAndDoctors` with `filterAssignedTo` is enough if backend respects it.
+      }
+
 
       // Fetch Tasks
       const tasksResponse = await axios.get('http://localhost:5000/api/tasks', config);
@@ -73,12 +86,12 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
 
     } catch (err) {
       console.error('Error fetching tasks or doctors:', err.response ? err.response.data : err.message);
-      // setError(`Failed to load tasks. ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Please try again later.'}`); // Can keep inline error
-      toast.error(`Failed to load tasks: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Please try again later.'}`); // Use toast for immediate feedback
+      toast.error(`Failed to load tasks: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Please try again later.'}`);
     } finally {
       setLoading(false);
     }
   }, [user, filterStatus, filterAssignedTo, filterDueDateStart, filterDueDateEnd, sortField, sortOrder]);
+
 
   useEffect(() => {
     fetchTasksAndDoctors();
@@ -94,15 +107,14 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
         };
         await axios.delete(`http://localhost:5000/api/tasks/${id}`, config);
         onTaskDeleted();
-        toast.success('Task deleted successfully!'); // Use toast for success
+        toast.success('Task deleted successfully!');
       } catch (err) {
         console.error('Error deleting task:', err.response ? err.response.data : err.message);
-        toast.error(`Failed to delete task: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Something went wrong!'}`); // Use toast for error
+        toast.error(`Failed to delete task: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Something went wrong!'}`);
       }
     }
   };
 
-  // Handle task acceptance
   const handleAcceptTask = async (taskId) => {
     try {
       const config = {
@@ -111,29 +123,26 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
         },
       };
       await axios.put(`http://localhost:5000/api/tasks/${taskId}/accept`, {}, config);
-      toast.success('Task accepted!'); // Use toast for success
-      fetchTasksAndDoctors(); // Re-fetch tasks to update UI
+      toast.success('Task accepted!');
+      fetchTasksAndDoctors();
     } catch (err) {
       console.error('Error accepting task:', err.response ? err.response.data : err.message);
-      toast.error(`Failed to accept task: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Something went wrong!'}`); // Use toast for error
+      toast.error(`Failed to accept task: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Something went wrong!'}`);
     }
   };
 
-  // Handle opening reject modal
   const handleOpenRejectModal = (task) => {
     setTaskToReject(task);
-    setRejectionReason(''); // Clear previous reason
+    setRejectionReason('');
     setShowRejectModal(true);
   };
 
-  // Handle closing reject modal
   const handleCloseRejectModal = () => {
     setShowRejectModal(false);
     setTaskToReject(null);
     setRejectionReason('');
   };
 
-  // Handle task rejection submission
   const handleRejectTask = async () => {
     if (!taskToReject) return;
     try {
@@ -143,12 +152,12 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
         },
       };
       await axios.put(`http://localhost:5000/api/tasks/${taskToReject._id}/reject`, { rejectionReason }, config);
-      toast.success('Task rejected!'); // Use toast for success
+      toast.success('Task rejected!');
       handleCloseRejectModal();
-      fetchTasksAndDoctors(); // Re-fetch tasks to update UI
+      fetchTasksAndDoctors();
     } catch (err) {
       console.error('Error rejecting task:', err.response ? err.response.data : err.message);
-      toast.error(`Failed to reject task: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Something went wrong!'}`); // Use toast for error
+      toast.error(`Failed to reject task: ${err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Something went wrong!'}`);
     }
   };
 
@@ -174,23 +183,26 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
           </select>
         </div>
 
-        {/* Assigned To Filter (Hide for doctors if desired, but keep for now) */}
-        <div className="col-md-3 col-sm-6">
-          <label htmlFor="filterAssignedTo" className="form-label visually-hidden">Filter by Doctor:</label>
-          <select
-            id="filterAssignedTo"
-            className="form-select"
-            value={filterAssignedTo}
-            onChange={(e) => setFilterAssignedTo(e.target.value)}
-          >
-            <option value="">All Doctors</option>
-            {doctorsList.map(doctor => (
-              <option key={doctor._id} value={doctor._id}>
-                {doctor.name || doctor.username}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Assigned To Filter - CONDITIONAL RENDERING HERE */}
+        {user.role === 'admin' && ( // <--- ADD THIS CONDITIONAL CHECK
+          <div className="col-md-3 col-sm-6">
+            <label htmlFor="filterAssignedTo" className="form-label visually-hidden">Filter by Doctor:</label>
+            <select
+              id="filterAssignedTo"
+              className="form-select"
+              value={filterAssignedTo}
+              onChange={(e) => setFilterAssignedTo(e.target.value)}
+            >
+              <option value="">All Doctors</option>
+              {doctorsList.map(doctor => (
+                <option key={doctor._id} value={doctor._id}>
+                  {doctor.name || doctor.username}
+                </option>
+              ))}
+            </select>
+          </div>
+        )} {/* <--- CLOSE THE CONDITIONAL RENDERING */}
+
 
         {/* Due Date Start Filter */}
         <div className="col-md-3 col-sm-6">
@@ -250,7 +262,7 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
 
       {loading ? (
         <p className="text-center">Loading tasks...</p>
-      ) : error ? ( // Keep inline error for fetch issues as a primary display
+      ) : error ? (
         <p className="text-danger text-center">{error}</p>
       ) : tasks.length === 0 ? (
         <p className="text-center">No tasks found. Add a new task!</p>
@@ -274,7 +286,7 @@ function TaskList({ onEditTask, onTaskDeleted, refreshTrigger }) {
                     <span className={`badge ${
                         task.assignmentStatus === 'accepted' ? 'bg-success' :
                         task.assignmentStatus === 'rejected' ? 'bg-danger' :
-                        'bg-info text-dark' // pending-acceptance
+                        'bg-info text-dark'
                     }`}>
                       {task.assignmentStatus}
                     </span>

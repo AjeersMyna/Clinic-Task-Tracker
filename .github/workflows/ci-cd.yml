@@ -1,139 +1,48 @@
-# .github/workflows/ci-cd.yml
-
-name: MERN CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - master # Ensure this is 'master' as confirmed
+      - main
 
 jobs:
-  backend-ci:
-    name: Backend Build and Test
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20' # Confirmed Node.js version
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
 
-      - name: Install Backend Dependencies
-        run: npm install
-        working-directory: backend/
+    - name: Install dependencies (server)
+      run: |
+        cd backend
+        npm install
 
-      # - name: Run Backend Tests (Optional, uncomment if you have tests)
-      #   run: npm test
-      #   working-directory: backend/
+    - name: Run server tests (if any)
+      run: |
+        cd backend
+        npm test
 
-      - name: Prepare Backend for Deployment
-        run: |
-          zip -r backend-app.zip .
-        working-directory: backend/
+    - name: Install dependencies (client)
+      run: |
+        cd frontend
+        npm install
 
-      - name: Upload Backend Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-build
-          path: backend/backend-app.zip
-          retention-days: 5
+    - name: Run client tests (if any)
+      run: |
+        cd frontend
+        npm test
 
-  frontend-ci:
-    name: Frontend Build and Test
-    runs-on: ubuntu-latest
+    - name: Build Docker images
+      run: docker-compose build
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20' # Confirmed Node.js version
-
-      - name: Install Frontend Dependencies
-        run: npm install
-        working-directory: frontend/
-
-      # - name: Run Frontend Tests (Optional, uncomment if you have tests)
-      #   run: npm test
-      #   working-directory: frontend/
-
-      - name: Build Frontend
-        run: npm run build
-        working-directory: frontend/
-
-      - name: Prepare Frontend for Deployment
-        run: |
-          zip -r frontend-build.zip build/
-        working-directory: frontend/
-
-      - name: Upload Frontend Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend/frontend-build.zip
-          retention-days: 5
-
-  # NEW JOB STARTS HERE:
-  deploy-to-aws:
-    name: Deploy to AWS Elastic Beanstalk
-    runs-on: ubuntu-latest
-    needs: [backend-ci, frontend-ci] # This ensures CI jobs complete first
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # Download the build artifacts from previous jobs
-      - name: Download Backend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-build
-          path: backend-artifacts/
-
-      - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend-artifacts/
-
-      # Set up AWS credentials using the GitHub Secrets
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }} # This will be 'ap-south-1'
-
-      # Deploy the Backend to Elastic Beanstalk
-      # This assumes your Node.js backend serves your React frontend's build folder.
-      - name: Deploy Backend to EB
-        uses: aws-actions/elasticbeanstalk-deploy@v1
-        with:
-          application_name: clinic-task-tracker-app # << CONFIRMED EB APPLICATION NAME
-          environment_name: clinic-task-tracker-env # << CONFIRMED EB ENVIRONMENT NAME
-          version_label: backend-${{ github.sha }} # Creates a unique version for each deployment
-          source_bundle: backend-artifacts/backend-app.zip # Path to the zip file created and downloaded
-          region: ${{ secrets.AWS_REGION }}
-
-      # --- Optional: If your frontend is deployed separately (e.g., to S3/CloudFront) ---
-      # (Keep these commented out unless you plan a separate frontend deployment)
-      # - name: Deploy Frontend to S3
-      #   run: |
-      #     aws s3 sync frontend-artifacts/build/ s3://YOUR_FRONTEND_S3_BUCKET_NAME/ --delete
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      # - name: Invalidate CloudFront Cache (if using CloudFront with S3)
-      #   run: |
-      #     aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
-      #   env:
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     AWS_REGION: ${{ secrets.AWS_REGION }}
+    # This next step would be for AWS deployment (commented out for now)
+    # - name: Deploy to AWS
+    #   if: success()
+    #   run: |
+    #     echo "Deployment logic here"

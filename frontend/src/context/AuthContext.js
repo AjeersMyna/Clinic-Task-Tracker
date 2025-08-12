@@ -38,8 +38,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // UPDATED: register function now accepts 'username'
-  const register = async (name, email, password, username) => { 
+  // UPDATED: register function - Corrected API endpoint URL
+  const register = async (name, email, password, username, role = 'patient') => { // Added default role
     try {
       const config = {
         headers: {
@@ -47,9 +47,9 @@ export const AuthProvider = ({ children }) => {
         },
       };
       const { data } = await axios.post(
-        'http://localhost:5000/api/users/register',
-        // UPDATED: Include username in the request body
-        { name, email, password, username }, 
+        // IMPORTANT CHANGE: Corrected URL from '/api/users/register' to '/api/users'
+        'http://localhost:5000/api/users', // This matches router.post('/', registerUser)
+        { name, email, password, username, role }, // Included role
         config
       );
       setUser(data);

@@ -1,28 +1,18 @@
-# Use the official Node.js 20 LTS image as the base image.
-# Alpine is a lightweight Linux distribution, good for smaller image sizes.
-FROM node:20-alpine
+# Use an official Node runtime as a parent image
+FROM node:18-alpine
 
-# Set the working directory inside the container.
-# All subsequent commands will be executed in this directory.
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if you have one) to the working directory.
-# We copy these first to leverage Docker's caching. If dependencies don't change,
-# this layer won't be rebuilt.
+# Copy package.json and package-lock.json and install dependencies
 COPY package*.json ./
+RUN npm install
 
-# Install dependencies.
-# Use 'npm ci' for clean installs in CI/CD environments and Docker builds,
-# as it uses package-lock.json for exact versions.
-RUN npm ci
-
-# Copy the rest of the application code to the working directory.
+# Copy the rest of the application source code
 COPY . .
 
-# Expose the port your Express.js application listens on.
-# Make sure this matches the port configured in your backend (e.g., process.env.PORT or 5000).
+# Expose the port the app runs on
 EXPOSE 5000
 
-# Define the command to run your application when the container starts.
-# 'npm start' should be defined in your package.json scripts.
-CMD ["npm", "start"]
+# Specify the command to run the application
+CMD [ "npm", "start" ]

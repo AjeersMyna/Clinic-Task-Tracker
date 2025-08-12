@@ -1,0 +1,25 @@
+# Environments
+.env
+
+# Node modules
+node_modules
+
+# Build outputs
+build/
+dist/
+.parcel-cache/
+/frontend/build/ # If your frontend build output is specifically here
+/backend/node_modules/ # If you have a separate node_modules in backend
+/frontend/node_modules/ # If you have a separate node_modules in frontend
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.idea/
+.vscode/
+*.swp
